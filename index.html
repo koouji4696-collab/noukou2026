@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nona.G 録音処</title>
+<style>
+  :root{
+    --navy:#1f3864;
+    --green:#3d7a3d;
+    --red:#b03030;
+    --paper:#f7f9fc;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:24px 12px 40px;
+    background:var(--paper);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
+    color:#1a1a1a;
+  }
+  .frame{
+    max-width:620px; margin:0 auto; position:relative;
+    border:3px solid var(--navy); border-radius:6px; padding:10px; background:#fff;
+  }
+  .inner{
+    border:1px solid var(--navy); border-radius:4px; padding:28px 26px 22px;
+    background:
+      radial-gradient(circle, #d8dde6 1px, transparent 1px) 0 0/16px 16px,
+      #fdfefe;
+  }
+  .cap{
+    position:absolute; top:-26px; left:50%; transform:translateX(-50%);
+    background:#eaf0fa; padding:2px 12px; font-size:26px; line-height:1;
+  }
+  h1{
+    text-align:center; color:var(--navy); font-size:30px; letter-spacing:.12em;
+    margin:6px 0 14px; font-weight:800;
+  }
+  .rule{border-bottom:2px solid var(--navy); margin-bottom:24px;}
+  label{display:block; font-weight:700; color:#243b5e; margin:0 0 8px; font-size:16px;}
+  select, input[type=text]{
+    width:100%; padding:13px 14px; font-size:16px; border-radius:8px;
+    border:1px solid #b9c6da; background:#fff; margin-bottom:20px; font-family:inherit;
+  }
+  select:focus, input:focus{outline:2px solid #7fa3d8; border-color:#7fa3d8;}
+
+  #btnMain{
+    width:100%; padding:26px 10px; font-size:22px; font-weight:800; color:#fff;
+    border:0; border-radius:10px; cursor:pointer; font-family:inherit;
+    background:var(--green); box-shadow:0 3px 6px rgba(0,0,0,.20);
+    letter-spacing:.04em; margin-bottom:18px;
+  }
+  #btnMain.stop{background:var(--red);}
+  #btnMain:disabled{opacity:.45; cursor:not-allowed; box-shadow:none;}
+  #btnMain:focus-visible{outline:3px solid #7fa3d8; outline-offset:3px;}
+
+  .msg{
+    border-left:5px solid var(--green); background:#eef8ee; padding:16px 18px;
+    border-radius:4px; font-weight:700; color:#1c4a1c; line-height:1.7;
+    margin-bottom:16px; text-align:center; font-size:15px;
+  }
+  .msg.err{border-left-color:var(--red); background:#fdeeee; color:#7d1f1f;}
+  .msg.wait{border-left-color:#c9862b; background:#fdf5e8; color:#7a5312;}
+  .msg .sub{display:block; font-weight:400; font-size:13px; margin-top:8px; line-height:1.8;}
+  .live{
+    border:1px solid #cfd9e8; border-radius:8px; background:#fff;
+    padding:14px 16px; font-size:14px; line-height:1.9; color:#333;
+    max-height:190px; overflow-y:auto; margin-bottom:16px;
+  }
+  .live .interim{color:#8a8a8a;}
+  .live .ttl{
+    font-size:12px; font-weight:700; color:var(--navy); letter-spacing:.08em;
+    display:block; margin-bottom:6px;
+  }
+  audio{width:100%; margin-bottom:14px;}
+  .foot{text-align:center; font-size:22px; letter-spacing:.3em; margin-top:6px;}
+  .rec{
+    display:none; text-align:center; font-weight:700; color:var(--red);
+    margin-bottom:14px; font-size:18px;
+  }
+  .rec.on{display:block;}
+  .dot{
+    display:inline-block; width:11px; height:11px; border-radius:50%;
+    background:#d63b3b; margin-right:8px; animation:bl 1s infinite;
+  }
+  @keyframes bl{50%{opacity:.2;}}
+  @media (prefers-reduced-motion: reduce){ .dot{animation:none;} }
+  .note{font-size:12px; color:#6c7a90; line-height:1.8; margin-top:14px;}
+  details{
+    border:1px dashed #b9c6da; border-radius:8px; padding:10px 14px;
+    margin-bottom:16px; background:#fbfcfe;
+  }
+  summary{cursor:pointer; font-size:14px; font-weight:700; color:var(--navy);}
+  details p{font-size:13px; color:#5a6a80; line-height:1.8;}
+  input[type=file]{
+    width:100%; font-size:14px; padding:10px; border:1px solid #b9c6da;
+    border-radius:8px; background:#fff; margin-top:10px; font-family:inherit;
+  }
+</style>
+</head>
+<body>
+
+<div class="frame">
+  <div class="cap">🎓</div>
+  <div class="inner">
+
+    <h1>🎓 Nona.G 録音処</h1>
+    <div class="rule"></div>
+
+    <label for="group">🎓 グループを選択：</label>
+    <select id="group"></select>
+
+    <label for="name">👤 お名前（ニックネーム・任意）：</label>
+    <input type="text" id="name" placeholder="例）たろう" autocomplete="off">
+
+    <button id="btnMain">🎤 録音を始める</button>
+
+    <div class="rec" id="rec"><span class="dot"></span><span id="timer">00:00</span> 録音中</div>
+
+    <div id="status"></div>
+
+    <div class="live" id="live">
+      <span class="ttl">📝 リアルタイム文字起こし</span>
+      <span id="liveText" style="color:#8a8a8a;">録音を始めると、ここに話した内容が表示されます。</span>
+      <span class="interim" id="interimText"></span>
+    </div>
+
+    <audio id="player" controls style="display:none;"></audio>
+
+    <details id="fallback">
+      <summary>マイクが使えないときはこちら</summary>
+      <p>
+        スマホの録音アプリで話し合いを録音し、そのファイルをここから提出できます。<br>
+        ボタンを押すと端末の録音アプリが開きます（この方法では自動要約は行われず、音声の保存のみになります）。
+      </p>
+      <input type="file" id="fileRec" accept="audio/*" capture>
+    </details>
+
+    <div class="foot">🎓 📚 🎓</div>
+
+    <div class="note">
+      ・Google Chrome でお使いください（文字起こしは Chrome のみ対応です）。<br>
+      ・マイクの使用を求められたら「許可」を押してください。<br>
+      ・停止すると、そのまま自動で保存と要約まで行います。<br>
+      ・録音は最大 <span id="maxLabel">40</span> 分で自動的に停止します。<br>
+      ・話し合いの内容は先生が見ます。安心して話してください。
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ==================================================================
+   ★ここだけ書き換えてください★
+================================================================== */
+// Apps Script のデプロイURL（末尾が /exec のもの）
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbwmA8zu2heXN3yHm7hs290OQNljdFDw9AgE42jzvVozb_NCzLegNvQ_GXuHBRU17yPP/exec';
+
+// スクリプト プロパティ ACCESS_TOKEN と同じ文字列
+var TOKEN = 'noNaG-2026-tuat';
+
+var GROUP_COUNT = 30;      // 班の数
+var MAX_MINUTES = 40;      // 1回の録音の上限（分）
+/* ================================================================ */
+
+var SEND_INTERVAL_MS = 30000;   // 文字起こしを送る間隔（30秒ごと）
+var CHUNK_CHARS = 800000;       // 音声を分けて送るときの1回分の大きさ
+var MAX_MS = MAX_MINUTES * 60 * 1000;
+
+var recorder = null, stream = null, chunks = [], recBlob = null;
+var recognition = null, wantRecognize = false;
+var buffer = '', sendTimer = null, tickTimer = null, autoStopTimer = null;
+var startedAt = 0, sessionId = '', mimeType = '', durationSec = 0;
+var isRecording = false, saved = false;
+
+var $ = function (id) { return document.getElementById(id); };
+
+/* ------------------------------------------------------------------
+   起動時：班のリストを作り、?g=12 があればその班を選ぶ
+------------------------------------------------------------------ */
+(function init() {
+  var sel = $('group');
+  for (var i = 1; i <= GROUP_COUNT; i++) {
+    var o = document.createElement('option');
+    o.value = i + '班'; o.textContent = i + '班';
+    sel.appendChild(o);
+  }
+  var g = parseInt(new URLSearchParams(location.search).get('g'), 10);
+  if (g >= 1 && g <= GROUP_COUNT) sel.value = g + '班';
+  $('maxLabel').textContent = MAX_MINUTES;
+})();
+
+/* ------------------------------------------------------------------
+   表示のヘルパー
+------------------------------------------------------------------ */
+function status(html, kind) {
+  $('status').innerHTML = '<div class="msg ' + (kind || '') + '">' + html + '</div>';
+}
+function clearStatus() { $('status').innerHTML = ''; }
+function newSessionId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 8); }
+function theName() { return ($('name').value || '').trim() || '匿名'; }
+
+/* Apps Script への送信。
+   Content-Type を text/plain にすることで、CORSの事前確認を発生させずに送ります。 */
+async function api(action, data) {
+  var body = Object.assign({ action: action, token: TOKEN }, data || {});
+  var res = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(body)
+  });
+  var out = await res.json();
+  if (!out.ok && out.error) throw new Error(out.error);
+  return out;
+}
+
+/* ------------------------------------------------------------------
+   ボタンは1つ。押すたびに 開始 ⇄ 停止 が切り替わる。
+------------------------------------------------------------------ */
+$('btnMain').onclick = function () {
+  if (isRecording) { stopAll(); } else { startAll(); }
+};
+
+async function startAll() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    micError('このページではマイクを使えません。',
+      'https:// で始まるURLで開いているか確認してください。');
+    return;
+  }
+
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation: true, noiseSuppression: true }
+    });
+  } catch (e) {
+    handleMicError(e);
+    return;
+  }
+
+  mimeType = pickMime();
+  chunks = []; recBlob = null; saved = false;
+  recorder = new MediaRecorder(stream, { mimeType: mimeType, audioBitsPerSecond: 32000 });
+  recorder.ondataavailable = function (ev) { if (ev.data && ev.data.size > 0) chunks.push(ev.data); };
+  recorder.onstop = onRecorderStop;
+  recorder.start(1000);
+
+  sessionId = newSessionId();
+  startedAt = Date.now();
+  buffer = '';
+  $('liveText').textContent = '';
+  $('liveText').style.color = '#333';
+  $('interimText').textContent = '';
+
+  startRecognition();
+  sendTimer = setInterval(flushBuffer, SEND_INTERVAL_MS);
+  tickTimer = setInterval(tick, 500);
+  autoStopTimer = setTimeout(function () {
+    status('最大時間になったため、自動で停止しました。', 'wait');
+    stopAll();
+  }, MAX_MS);
+
+  isRecording = true;
+  $('btnMain').textContent = '■ 録音を終える（自動で保存します）';
+  $('btnMain').classList.add('stop');
+  $('group').disabled = true;
+  $('rec').classList.add('on');
+  $('player').style.display = 'none';
+  clearStatus();
+}
+
+function handleMicError(e) {
+  var name = e && e.name ? e.name : '';
+  if (name === 'NotAllowedError' || name === 'SecurityError') {
+    micError('マイクの使用が許可されませんでした。',
+      'アドレスバー左の鍵アイコン →「マイク」を「許可」にして、ページを再読み込みしてください。');
+  } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
+    micError('マイクが見つかりませんでした。',
+      'イヤホンマイクを接続するか、別の端末でお試しください。');
+  } else if (name === 'NotReadableError') {
+    micError('マイクを他のアプリが使用中です。',
+      'Zoom や録音アプリなど、マイクを使っているアプリを閉じてからもう一度お試しください。');
+  } else {
+    micError('マイクを使えませんでした。', (e && e.message) ? e.message : '');
+  }
+}
+
+function micError(main, sub) {
+  status(main + (sub ? '<span class="sub">' + sub + '</span>' : ''), 'err');
+  $('fallback').open = true;
+}
+
+function pickMime() {
+  var list = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'];
+  for (var i = 0; i < list.length; i++) {
+    if (window.MediaRecorder && MediaRecorder.isTypeSupported(list[i])) return list[i];
+  }
+  return '';
+}
+
+function tick() {
+  var s = Math.floor((Date.now() - startedAt) / 1000);
+  var m = Math.floor(s / 60);
+  $('timer').textContent = ('0' + m).slice(-2) + ':' + ('0' + (s % 60)).slice(-2);
+}
+
+/* ------------------------------------------------------------------
+   リアルタイム文字起こし（Web Speech API）
+------------------------------------------------------------------ */
+function startRecognition() {
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) {
+    $('liveText').textContent = '（このブラウザは文字起こしに対応していません。録音のみ行います）';
+    return;
+  }
+  wantRecognize = true;
+  recognition = new SR();
+  recognition.lang = 'ja-JP';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  recognition.onresult = function (ev) {
+    var interim = '';
+    for (var i = ev.resultIndex; i < ev.results.length; i++) {
+      var t = ev.results[i][0].transcript;
+      if (ev.results[i].isFinal) {
+        buffer += t;
+        $('liveText').textContent += t + '。';
+        $('live').scrollTop = $('live').scrollHeight;
+        if (buffer.length > 600) flushBuffer();
+      } else {
+        interim += t;
+      }
+    }
+    $('interimText').textContent = interim;
+  };
+
+  recognition.onerror = function (ev) {
+    if (ev.error === 'not-allowed' || ev.error === 'service-not-allowed') {
+      wantRecognize = false;
+      $('liveText').textContent = '（文字起こしが許可されませんでした。録音は続いています）';
+    }
+  };
+
+  // Chrome は数十秒で勝手に止まるので、止まったら自動で掛け直す
+  recognition.onend = function () {
+    if (wantRecognize) { try { recognition.start(); } catch (e) {} }
+  };
+
+  try { recognition.start(); } catch (e) {}
+}
+
+function stopRecognition() {
+  wantRecognize = false;
+  if (recognition) { try { recognition.stop(); } catch (e) {} }
+  $('interimText').textContent = '';
+}
+
+function flushBuffer() {
+  var text = buffer.trim();
+  if (!text) return Promise.resolve();
+  buffer = '';
+  return api('transcript', {
+    sessionId: sessionId,
+    group: $('group').value,
+    name: theName(),
+    text: text
+  }).catch(function (e) {
+    buffer = text + buffer;   // 失敗したら次回にまとめて送る
+    console.log('送信リトライ待ち: ' + e.message);
+  });
+}
+
+/* ------------------------------------------------------------------
+   停止 → そのまま自動で保存・要約
+------------------------------------------------------------------ */
+function stopAll() {
+  if (!recorder || recorder.state === 'inactive') return;
+  durationSec = Math.floor((Date.now() - startedAt) / 1000);
+  clearInterval(sendTimer); clearInterval(tickTimer); clearTimeout(autoStopTimer);
+  stopRecognition();
+  flushBuffer();
+  recorder.stop();
+  if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
+
+  isRecording = false;
+  $('rec').classList.remove('on');
+  $('btnMain').disabled = true;
+  $('btnMain').textContent = '保存しています…';
+  $('btnMain').classList.remove('stop');
+}
+
+function onRecorderStop() {
+  recBlob = new Blob(chunks, { type: mimeType || 'audio/webm' });
+  $('player').src = URL.createObjectURL(recBlob);
+  $('player').style.display = 'block';
+  saveAndSummarize(recBlob, mimeType || 'audio/webm', durationSec, true);
+}
+
+async function saveAndSummarize(blob, mtype, seconds, withSummary) {
+  $('btnMain').disabled = true;
+
+  try {
+    status('保存の準備をしています…', 'wait');
+    var b64 = await blobToBase64(blob);
+
+    var ext = (mtype.indexOf('mp4') >= 0) ? 'm4a'
+            : (mtype.indexOf('ogg') >= 0) ? 'ogg'
+            : (mtype.indexOf('mpeg') >= 0) ? 'mp3' : 'webm';
+    var fileName = $('group').value + '_' + theName() + '_'
+                 + new Date().toISOString().replace(/[:.]/g, '-') + '.' + ext;
+
+    var total = Math.ceil(b64.length / CHUNK_CHARS);
+    for (var i = 0; i < total; i++) {
+      status('音声を送信しています… （' + (i + 1) + ' / ' + total + '）', 'wait');
+      await api('chunk', { sessionId: sessionId, index: i,
+                           chunk: b64.substr(i * CHUNK_CHARS, CHUNK_CHARS) });
+    }
+
+    status('ドライブに保存しています…', 'wait');
+    var r = await api('finalize', {
+      sessionId: sessionId, group: $('group').value, name: theName(),
+      fileName: fileName, mimeType: mtype, total: total, seconds: seconds
+    });
+    saved = true;
+
+    if (!withSummary) {
+      status('🎉 音声を保存しました。<br>お疲れさまでした！', '');
+      resetButton();
+      return;
+    }
+
+    status('保存しました。続けて、話し合いの要約を作成しています…', 'wait');
+
+    try {
+      await api('summarize', {
+        sessionId: sessionId, group: $('group').value,
+        name: theName(), audioUrl: r.url
+      });
+      status('🎉 保存と要約が完了しました。<br>お疲れさまでした！', '');
+    } catch (e) {
+      status('🎉 音声は保存できました。<span class="sub">' + e.message + '</span>', 'wait');
+    }
+    resetButton();
+
+  } catch (e) {
+    status('保存中にエラーが起きました。<span class="sub">' + e.message + '</span>' +
+           '下のボタンをもう一度押すと、保存をやり直します。', 'err');
+    $('btnMain').disabled = false;
+    $('btnMain').textContent = '💾 保存をやり直す';
+    $('btnMain').onclick = function () {
+      resetHandler();
+      saveAndSummarize(blob, mtype, seconds, withSummary);
+    };
+  }
+}
+
+function resetHandler() {
+  $('btnMain').onclick = function () { if (isRecording) stopAll(); else startAll(); };
+}
+
+function resetButton() {
+  $('btnMain').disabled = false;
+  $('btnMain').textContent = '🎤 もう一度録音する';
+  $('group').disabled = false;
+  resetHandler();
+}
+
+/* 代替手段：端末の録音アプリで録ったファイルを提出 */
+$('fileRec').addEventListener('change', function (ev) {
+  var f = ev.target.files && ev.target.files[0];
+  if (!f) return;
+  sessionId = newSessionId();
+  saved = false;
+  saveAndSummarize(f, f.type || 'audio/mp4', 0, false);
+});
+
+function blobToBase64(blob) {
+  return new Promise(function (resolve, reject) {
+    var fr = new FileReader();
+    fr.onload = function () { resolve(String(fr.result).split(',')[1]); };
+    fr.onerror = function () { reject(new Error('音声データの読み込みに失敗しました。')); };
+    fr.readAsDataURL(blob);
+  });
+}
+
+window.addEventListener('beforeunload', function (e) {
+  if (isRecording || (recBlob && !saved)) { e.preventDefault(); e.returnValue = ''; }
+});
+</script>
+</body>
+</html>
