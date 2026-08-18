@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nona.G 教員卓</title>
+<style>
+  :root{
+    --navy:#1f3864; --ink:#1a1a1a; --paper:#f4f6fa;
+    --active:#2f7d4f; --slow:#c9862b; --stopped:#9aa4b5; --none:#c9d1de;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:18px 16px 60px; background:var(--paper); color:var(--ink);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;}
+  header{max-width:1240px; margin:0 auto 18px; display:flex; flex-wrap:wrap;
+    align-items:center; gap:12px;}
+  h1{font-size:22px; color:var(--navy); margin:0; letter-spacing:.06em; font-weight:800;}
+  .spacer{flex:1;}
+  input, button, select{font-family:inherit; font-size:14px;}
+  input[type=text], input[type=password]{padding:9px 11px; border:1px solid #b9c6da;
+    border-radius:7px; background:#fff; width:170px;}
+  button{padding:9px 15px; border:0; border-radius:7px; background:var(--navy);
+    color:#fff; font-weight:700; cursor:pointer;}
+  button.ghost{background:#fff; color:var(--navy); border:1px solid #b9c6da;}
+  button:disabled{opacity:.45; cursor:not-allowed;}
+  .bar{max-width:1240px; margin:0 auto 14px; font-size:13px; color:#5a6a80;}
+
+  .rounds{max-width:1240px; margin:0 auto 16px; background:#fff; border:1px solid #dbe2ec;
+    border-radius:9px; padding:14px 18px; display:flex; flex-wrap:wrap;
+    align-items:center; gap:10px 22px;}
+  .rounds .now{display:flex; align-items:baseline; gap:10px; padding-right:20px;
+    border-right:1px solid #e4e9f1;}
+  .nowLabel{font-size:19px; font-weight:800; color:var(--navy);}
+  .nowSub{font-size:11px; color:#8a95a5;}
+  .rounds .switch, .rounds .view{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .rounds .lbl{font-size:12px; color:#5a6a80; font-weight:700;}
+  .rounds select{padding:8px 10px; border:1px solid #b9c6da; border-radius:7px; background:#fff;}
+  .rounds input[type=text]{width:190px;}
+  @media (max-width:820px){
+    .rounds .now{border-right:0; padding-right:0; width:100%;}
+  }
+
+  .legend{display:flex; gap:14px; flex-wrap:wrap; font-size:12px; color:#5a6a80;
+    max-width:1240px; margin:0 auto 14px;}
+  .legend i{display:inline-block; width:10px; height:10px; border-radius:50%; margin-right:5px;}
+
+  .grid{max-width:1240px; margin:0 auto; display:grid; gap:12px;
+    grid-template-columns:repeat(auto-fill, minmax(230px, 1fr));}
+  .card{background:#fff; border:1px solid #dbe2ec; border-left:5px solid var(--none);
+    border-radius:9px; padding:12px 14px; min-height:132px; display:flex; flex-direction:column;}
+  .card.active {border-left-color:var(--active);}
+  .card.slow   {border-left-color:var(--slow);}
+  .card.stopped{border-left-color:var(--stopped);}
+  .card h2{font-size:16px; margin:0 0 4px; color:var(--navy); font-weight:800;
+    display:flex; align-items:center; gap:7px;}
+  .pulse{width:9px; height:9px; border-radius:50%; background:var(--active);
+    animation:bl 1.4s infinite;}
+  @keyframes bl{50%{opacity:.25;}}
+  @media (prefers-reduced-motion: reduce){ .pulse{animation:none;} }
+  .meta{font-size:11px; color:#7a8798; margin-bottom:7px;}
+  .tail{font-size:12px; line-height:1.75; color:#3a4756; flex:1;
+    overflow:hidden; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical;}
+  .tail.empty{color:#aab3c0;}
+  .card button{margin-top:9px; padding:6px 10px; font-size:12px; align-self:flex-start;}
+
+  /* キーワード */
+  .panel{max-width:1240px; margin:26px auto 0; background:#fff; border:1px solid #dbe2ec;
+    border-radius:9px; padding:18px 20px;}
+  .panel h2{font-size:17px; color:var(--navy); margin:0 0 12px;}
+  .cloud{display:flex; flex-wrap:wrap; gap:6px 14px; align-items:baseline; line-height:2;}
+  .cloud span{color:var(--navy); cursor:default;}
+  .trend{margin-top:14px; font-size:13px; line-height:1.9; color:#3a4756;
+    border-left:4px solid #dbe2ec; padding-left:12px;}
+
+  /* 要約モーダル */
+  .modal{position:fixed; inset:0; background:rgba(20,28,42,.55); display:none;
+    align-items:center; justify-content:center; padding:20px; z-index:50;}
+  .modal.on{display:flex;}
+  .sheet{background:#fff; border-radius:11px; max-width:720px; width:100%;
+    max-height:86vh; overflow-y:auto; padding:24px 26px;}
+  .sheet h3{margin:0 0 4px; color:var(--navy); font-size:20px;}
+  .sheet .sub{font-size:12px; color:#7a8798; margin-bottom:16px;}
+  .sheet section{margin-bottom:16px;}
+  .sheet h4{font-size:13px; color:var(--navy); margin:0 0 5px; letter-spacing:.05em;}
+  .sheet p{margin:0; font-size:14px; line-height:1.9; white-space:pre-wrap; color:#2c3644;}
+  .sheet .close{margin-top:8px;}
+  .err{color:#a32020; font-size:13px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎓 Nona.G 教員卓</h1>
+  <div class="spacer"></div>
+  <input type="password" id="pw" placeholder="教員用の合言葉">
+  <button id="btnStart">表示を開始</button>
+</header>
+
+<div class="rounds" id="rounds">
+  <div class="now">
+    <span class="nowLabel" id="nowRound">—</span>
+    <span class="nowSub">いま生徒が録音するとこの回に記録されます</span>
+  </div>
+  <div class="switch">
+    <span class="lbl">回を切り替える</span>
+    <select id="roundNo"></select>
+    <input type="text" id="roundLabel" placeholder="呼び名（例：導入の話し合い）">
+    <button id="btnRound" disabled>この回を開始する</button>
+  </div>
+  <div class="view">
+    <span class="lbl">表示する回</span>
+    <select id="viewRound"></select>
+    <button id="btnKw" class="ghost" disabled>キーワードを更新</button>
+    <button id="btnAll" class="ghost" disabled>この回の全班を要約</button>
+  </div>
+</div>
+
+<div class="bar" id="bar">合言葉を入れて「表示を開始」を押してください。</div>
+
+<div class="legend">
+  <span><i style="background:var(--active)"></i>話している（2分以内）</span>
+  <span><i style="background:var(--slow)"></i>静か（6分以内）</span>
+  <span><i style="background:var(--stopped)"></i>止まっている</span>
+  <span><i style="background:var(--none)"></i>まだ記録なし</span>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<div class="panel">
+  <h2>🔤 全体で話題になっている言葉</h2>
+  <div class="cloud" id="cloud"><span style="font-size:14px;color:#aab3c0;">「キーワードを更新」を押すと表示されます。</span></div>
+  <div class="trend" id="trend"></div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="sheet" id="sheet"></div>
+</div>
+
+<script>
+/* ==================================================================
+   ★ここだけ書き換えてください★
+================================================================== */
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbzZfvDWqKfUoYWRNYw2UcolfO_4dDF3HygZ6709ofUW-FmMMw0eMH2M8XA1OAu0NfUV/exec';
+var GROUP_COUNT = 30;
+/* ================================================================ */
+
+var POLL_MS = 30000;    // 自動更新の間隔
+var token = '', timer = null;
+
+var $ = function (id) { return document.getElementById(id); };
+
+var currentRound = null;    // いま生徒が記録している回
+var viewClassId = '';       // 画面に表示している回
+
+(function () {
+  var sel = $('roundNo');
+  for (var i = 1; i <= 10; i++) {
+    var o = document.createElement('option');
+    o.value = i; o.textContent = '第' + i + '回';
+    sel.appendChild(o);
+  }
+  drawCards(placeholder());
+})();
+
+function placeholder() {
+  var a = [];
+  for (var i = 1; i <= GROUP_COUNT; i++) {
+    a.push({ group: i + '班', chars: 0, members: [], minutesAgo: null, state: 'none', tail: '' });
+  }
+  return a;
+}
+
+async function api(action, data) {
+  var body = Object.assign({ action: action, token: token, classId: viewClassId }, data || {});
+  var res = await fetch(GAS_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(body)
+  });
+  var out = await res.json();
+  if (!out.ok && out.error) throw new Error(out.error);
+  return out;
+}
+
+/* ------------------------------------------------------------------
+   ① 各班の状況を一覧表示（30秒ごとに自動更新）
+------------------------------------------------------------------ */
+$('btnStart').onclick = async function () {
+  token = $('pw').value.trim();
+  if (!token) { $('bar').textContent = '合言葉を入れてください。'; return; }
+
+  try {
+    var r = await api('getRound');       // 認証確認も兼ねる
+    currentRound = r;
+    viewClassId = r.classId;
+    $('nowRound').textContent = r.label;
+    $('roundNo').value = r.round;
+  } catch (e) {
+    $('bar').innerHTML = '<span class="err">' + e.message + '</span>';
+    return;
+  }
+
+  $('btnKw').disabled = false;
+  $('btnAll').disabled = false;
+  $('btnRound').disabled = false;
+
+  await loadRoundList();
+  refresh();
+  if (timer) clearInterval(timer);
+  timer = setInterval(refresh, POLL_MS);
+};
+
+/* 回を切り替える。以後、生徒が録音するとこの回に記録されます。 */
+$('btnRound').onclick = async function () {
+  var n = parseInt($('roundNo').value, 10);
+  var label = $('roundLabel').value.trim();
+  if (!confirm('第' + n + '回を開始します。\nこれ以降に生徒が始めた録音は第' + n + '回として記録されます。\nよろしいですか？')) return;
+
+  this.disabled = true;
+  try {
+    var r = await api('setRound', { round: n, label: label || null });
+    currentRound = r;
+    viewClassId = r.classId;
+    $('nowRound').textContent = r.label;
+    $('roundLabel').value = '';
+    await loadRoundList();
+    refresh();
+  } catch (e) { alert('エラー：' + e.message); }
+  this.disabled = false;
+};
+
+/* 表示する回の一覧を作る（過去の回も見られます） */
+async function loadRoundList() {
+  try {
+    var r = await api('listRounds');
+    var list = r.rounds || [];
+    if (currentRound && list.indexOf(currentRound.classId) < 0) list.unshift(currentRound.classId);
+
+    var sel = $('viewRound');
+    sel.innerHTML = '';
+    for (var i = 0; i < list.length; i++) {
+      var o = document.createElement('option');
+      o.value = list[i];
+      o.textContent = prettyRound(list[i]) +
+        (currentRound && list[i] === currentRound.classId ? '（実施中）' : '');
+      sel.appendChild(o);
+    }
+    sel.value = viewClassId;
+  } catch (e) { /* 一覧が作れなくても表示は続けます */ }
+}
+
+function prettyRound(id) {
+  var m = String(id).match(/^(\d{4})-(\d{2})-(\d{2})-R(\d+)$/);
+  if (!m) return id;
+  return m[2] + '/' + m[3] + ' 第' + m[4] + '回';
+}
+
+$('viewRound').onchange = function () {
+  viewClassId = this.value;
+  $('cloud').innerHTML = '<span style="font-size:14px;color:#aab3c0;">「キーワードを更新」を押すと表示されます。</span>';
+  $('trend').textContent = '';
+  refresh();
+};
+
+async function refresh() {
+  try {
+    var r = await api('dashboard');
+    drawCards(r.groups);
+    var t = new Date();
+    $('bar').textContent = '表示中：' + prettyRound(viewClassId) + '　/　最終更新 ' +
+      ('0' + t.getHours()).slice(-2) + ':' + ('0' + t.getMinutes()).slice(-2) +
+      ':' + ('0' + t.getSeconds()).slice(-2) + '（30秒ごとに自動更新）';
+  } catch (e) {
+    $('bar').innerHTML = '<span class="err">更新できませんでした：' + e.message + '</span>';
+  }
+}
+
+function drawCards(list) {
+  var html = '';
+  for (var i = 0; i < list.length; i++) {
+    var g = list[i];
+    var ago = (g.minutesAgo === null) ? 'まだ記録なし'
+            : (g.minutesAgo <= 0) ? 'たった今'
+            : g.minutesAgo + '分前';
+    var who = g.members.length ? g.members.length + '人' : '—';
+    html +=
+      '<div class="card ' + g.state + '">' +
+        '<h2>' + (g.state === 'active' ? '<span class="pulse"></span>' : '') + g.group + '</h2>' +
+        '<div class="meta">' + ago + '　/　' + who + '　/　' + g.chars.toLocaleString() + '字</div>' +
+        '<div class="tail' + (g.tail ? '' : ' empty') + '">' +
+          (g.tail ? escapeHtml(g.tail) : 'まだ発言が届いていません') + '</div>' +
+        (g.chars > 30
+          ? '<button class="ghost" onclick="showSummary(\'' + g.group + '\')">要約を見る</button>'
+          : '') +
+      '</div>';
+  }
+  $('grid').innerHTML = html;
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"]/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+  });
+}
+
+/* ------------------------------------------------------------------
+   ② 班ごとの要約（複数人の録音がまとめて1本になります）
+------------------------------------------------------------------ */
+async function showSummary(group) {
+  $('modal').classList.add('on');
+  $('sheet').innerHTML = '<h3>' + group + '</h3><p>要約を作成しています…</p>';
+  try {
+    var r = await api('groupSummary', { group: group });
+    var d = r.result;
+    $('sheet').innerHTML =
+      '<h3>' + group + '</h3>' +
+      '<div class="sub">録音した人：' + (r.members.join('、') || '—') +
+      '　/　' + r.chars.toLocaleString() + '字</div>' +
+      sec('話し合いの流れ', d.summary) +
+      sec('主な論点', d.points) +
+      sec('生徒から出てきた問い', d.questions) +
+      sec('この班に投げたい問いかけ', d.nextQuestions) +
+      sec('気になるサイン', d.concerns) +
+      sec('鍵になっている言葉', d.keywords) +
+      '<button class="close" onclick="closeModal()">閉じる</button>';
+  } catch (e) {
+    $('sheet').innerHTML = '<h3>' + group + '</h3><p class="err">' + e.message + '</p>' +
+      '<button class="close" onclick="closeModal()">閉じる</button>';
+  }
+}
+
+function sec(title, body) {
+  if (!body) return '';
+  return '<section><h4>' + title + '</h4><p>' + escapeHtml(body) + '</p></section>';
+}
+
+function closeModal() { $('modal').classList.remove('on'); }
+$('modal').onclick = function (e) { if (e.target === $('modal')) closeModal(); };
+
+$('btnAll').onclick = async function () {
+  if (!confirm(prettyRound(viewClassId) + ' の、記録のある班をすべて要約します。\n班の数だけ時間がかかります。よろしいですか？')) return;
+  this.disabled = true; this.textContent = '要約中…';
+  try {
+    var r = await api('summarizeAll');
+    alert('要約しました：' + (r.done.join('、') || 'なし') +
+          (r.failed.length ? '\n失敗：' + r.failed.join('、') : ''));
+  } catch (e) { alert('エラー：' + e.message); }
+  this.disabled = false; this.textContent = '全班を要約';
+};
+
+/* ------------------------------------------------------------------
+   ③ 全体のキーワードを可視化
+------------------------------------------------------------------ */
+$('btnKw').onclick = async function () {
+  this.disabled = true; this.textContent = '集計中…';
+  $('cloud').innerHTML = '<span style="font-size:14px;color:#aab3c0;">集計しています…</span>';
+  try {
+    var r = await api('keywords');
+    drawCloud(r.keywords);
+    $('trend').textContent = r.trend || '';
+  } catch (e) {
+    $('cloud').innerHTML = '<span class="err">' + e.message + '</span>';
+    $('trend').textContent = '';
+  }
+  this.disabled = false; this.textContent = 'キーワードを更新';
+};
+
+function drawCloud(list) {
+  if (!list || !list.length) {
+    $('cloud').innerHTML = '<span style="font-size:14px;color:#aab3c0;">まだ十分な発言がありません。</span>';
+    return;
+  }
+  var max = 1;
+  for (var i = 0; i < list.length; i++) max = Math.max(max, list[i].count || 1);
+
+  var html = '';
+  for (var j = 0; j < list.length; j++) {
+    var w = list[j];
+    var ratio = (w.count || 1) / max;
+    var size = 14 + Math.round(ratio * 26);              // 14〜40px
+    var alpha = 0.45 + ratio * 0.55;
+    html += '<span style="font-size:' + size + 'px;opacity:' + alpha.toFixed(2) +
+            ';font-weight:' + (ratio > .5 ? 800 : 600) + '" ' +
+            'title="' + (w.count || 0) + '回 / ' + (w.groups || 0) + '班">' +
+            escapeHtml(w.word) + '</span>';
+  }
+  $('cloud').innerHTML = html;
+}
+</script>
+</body>
+</html>
