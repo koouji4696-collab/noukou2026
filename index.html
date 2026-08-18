@@ -5,97 +5,61 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Nona.G 録音処</title>
 <style>
-  :root{
-    --navy:#1f3864;
-    --green:#3d7a3d;
-    --red:#b03030;
-    --paper:#f7f9fc;
-  }
+  :root{ --navy:#1f3864; --green:#3d7a3d; --red:#b03030; --paper:#f7f9fc; }
   *{box-sizing:border-box;}
-  body{
-    margin:0; padding:24px 12px 40px;
-    background:var(--paper);
-    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif;
-    color:#1a1a1a;
-  }
-  .frame{
-    max-width:620px; margin:0 auto; position:relative;
-    border:3px solid var(--navy); border-radius:6px; padding:10px; background:#fff;
-  }
-  .inner{
-    border:1px solid var(--navy); border-radius:4px; padding:28px 26px 22px;
-    background:
-      radial-gradient(circle, #d8dde6 1px, transparent 1px) 0 0/16px 16px,
-      #fdfefe;
-  }
-  .cap{
-    position:absolute; top:-26px; left:50%; transform:translateX(-50%);
-    background:#eaf0fa; padding:2px 12px; font-size:26px; line-height:1;
-  }
-  h1{
-    text-align:center; color:var(--navy); font-size:30px; letter-spacing:.12em;
-    margin:6px 0 14px; font-weight:800;
-  }
+  body{margin:0; padding:24px 12px 40px; background:var(--paper);
+    font-family:"Hiragino Kaku Gothic ProN","Yu Gothic","Meiryo",sans-serif; color:#1a1a1a;}
+  .frame{max-width:620px; margin:0 auto; position:relative;
+    border:3px solid var(--navy); border-radius:6px; padding:10px; background:#fff;}
+  .inner{border:1px solid var(--navy); border-radius:4px; padding:28px 26px 22px;
+    background: radial-gradient(circle, #d8dde6 1px, transparent 1px) 0 0/16px 16px, #fdfefe;}
+  .cap{position:absolute; top:-26px; left:50%; transform:translateX(-50%);
+    background:#eaf0fa; padding:2px 12px; font-size:26px; line-height:1;}
+  h1{text-align:center; color:var(--navy); font-size:30px; letter-spacing:.12em;
+    margin:6px 0 14px; font-weight:800;}
   .rule{border-bottom:2px solid var(--navy); margin-bottom:24px;}
+  .round{text-align:center; font-size:15px; font-weight:800; color:var(--navy);
+    background:#eaf0fa; border-radius:20px; padding:8px 14px; margin-bottom:22px;
+    letter-spacing:.06em;}
   label{display:block; font-weight:700; color:#243b5e; margin:0 0 8px; font-size:16px;}
-  select, input[type=text]{
-    width:100%; padding:13px 14px; font-size:16px; border-radius:8px;
-    border:1px solid #b9c6da; background:#fff; margin-bottom:20px; font-family:inherit;
-  }
+  select, input[type=text]{width:100%; padding:13px 14px; font-size:16px; border-radius:8px;
+    border:1px solid #b9c6da; background:#fff; margin-bottom:20px; font-family:inherit;}
   select:focus, input:focus{outline:2px solid #7fa3d8; border-color:#7fa3d8;}
-
-  #btnMain{
-    width:100%; padding:26px 10px; font-size:22px; font-weight:800; color:#fff;
+  #btnMain{width:100%; padding:26px 10px; font-size:22px; font-weight:800; color:#fff;
     border:0; border-radius:10px; cursor:pointer; font-family:inherit;
     background:var(--green); box-shadow:0 3px 6px rgba(0,0,0,.20);
-    letter-spacing:.04em; margin-bottom:18px;
-  }
+    letter-spacing:.04em; margin-bottom:18px;}
   #btnMain.stop{background:var(--red);}
   #btnMain:disabled{opacity:.45; cursor:not-allowed; box-shadow:none;}
   #btnMain:focus-visible{outline:3px solid #7fa3d8; outline-offset:3px;}
-
-  .msg{
-    border-left:5px solid var(--green); background:#eef8ee; padding:16px 18px;
+  .msg{border-left:5px solid var(--green); background:#eef8ee; padding:16px 18px;
     border-radius:4px; font-weight:700; color:#1c4a1c; line-height:1.7;
-    margin-bottom:16px; text-align:center; font-size:15px;
-  }
+    margin-bottom:16px; text-align:center; font-size:15px;}
   .msg.err{border-left-color:var(--red); background:#fdeeee; color:#7d1f1f;}
   .msg.wait{border-left-color:#c9862b; background:#fdf5e8; color:#7a5312;}
   .msg .sub{display:block; font-weight:400; font-size:13px; margin-top:8px; line-height:1.8;}
-  .live{
-    border:1px solid #cfd9e8; border-radius:8px; background:#fff;
+  .live{border:1px solid #cfd9e8; border-radius:8px; background:#fff;
     padding:14px 16px; font-size:14px; line-height:1.9; color:#333;
-    max-height:190px; overflow-y:auto; margin-bottom:16px;
-  }
+    max-height:190px; overflow-y:auto; margin-bottom:16px;}
   .live .interim{color:#8a8a8a;}
-  .live .ttl{
-    font-size:12px; font-weight:700; color:var(--navy); letter-spacing:.08em;
-    display:block; margin-bottom:6px;
-  }
+  .live .ttl{font-size:12px; font-weight:700; color:var(--navy); letter-spacing:.08em;
+    display:block; margin-bottom:6px;}
   audio{width:100%; margin-bottom:14px;}
   .foot{text-align:center; font-size:22px; letter-spacing:.3em; margin-top:6px;}
-  .rec{
-    display:none; text-align:center; font-weight:700; color:var(--red);
-    margin-bottom:14px; font-size:18px;
-  }
+  .rec{display:none; text-align:center; font-weight:700; color:var(--red);
+    margin-bottom:14px; font-size:18px;}
   .rec.on{display:block;}
-  .dot{
-    display:inline-block; width:11px; height:11px; border-radius:50%;
-    background:#d63b3b; margin-right:8px; animation:bl 1s infinite;
-  }
+  .dot{display:inline-block; width:11px; height:11px; border-radius:50%;
+    background:#d63b3b; margin-right:8px; animation:bl 1s infinite;}
   @keyframes bl{50%{opacity:.2;}}
   @media (prefers-reduced-motion: reduce){ .dot{animation:none;} }
   .note{font-size:12px; color:#6c7a90; line-height:1.8; margin-top:14px;}
-  details{
-    border:1px dashed #b9c6da; border-radius:8px; padding:10px 14px;
-    margin-bottom:16px; background:#fbfcfe;
-  }
+  details{border:1px dashed #b9c6da; border-radius:8px; padding:10px 14px;
+    margin-bottom:16px; background:#fbfcfe;}
   summary{cursor:pointer; font-size:14px; font-weight:700; color:var(--navy);}
   details p{font-size:13px; color:#5a6a80; line-height:1.8;}
-  input[type=file]{
-    width:100%; font-size:14px; padding:10px; border:1px solid #b9c6da;
-    border-radius:8px; background:#fff; margin-top:10px; font-family:inherit;
-  }
+  input[type=file]{width:100%; font-size:14px; padding:10px; border:1px solid #b9c6da;
+    border-radius:8px; background:#fff; margin-top:10px; font-family:inherit;}
 </style>
 </head>
 <body>
@@ -106,6 +70,8 @@
 
     <h1>🎓 Nona.G 録音処</h1>
     <div class="rule"></div>
+
+    <div class="round" id="roundBox">回を確認しています…</div>
 
     <label for="group">🎓 グループを選択：</label>
     <select id="group"></select>
@@ -140,7 +106,7 @@
 
     <div class="note">
       ・Google Chrome でお使いください（文字起こしは Chrome のみ対応です）。<br>
-      ・マイクの使用を求められたら「許可」を押してください。<br>
+      ・同じ班で何人が録音しても構いません。ひとつの話し合いとしてまとめられます。<br>
       ・停止すると、そのまま自動で保存と要約まで行います。<br>
       ・録音は最大 <span id="maxLabel">40</span> 分で自動的に停止します。<br>
       ・話し合いの内容は先生が見ます。安心して話してください。
@@ -153,19 +119,21 @@
 /* ==================================================================
    ★ここだけ書き換えてください★
 ================================================================== */
-// Apps Script のデプロイURL（末尾が /exec のもの）
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbwmA8zu2heXN3yHm7hs290OQNljdFDw9AgE42jzvVozb_NCzLegNvQ_GXuHBRU17yPP/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbzZfvDWqKfUoYWRNYw2UcolfO_4dDF3HygZ6709ofUW-FmMMw0eMH2M8XA1OAu0NfUV/exec';
+var TOKEN   = 'noNaG-2026-tuat';
 
-// スクリプト プロパティ ACCESS_TOKEN と同じ文字列
-var TOKEN = 'noNaG-2026-tuat';
-
-var GROUP_COUNT = 30;      // 班の数
-var MAX_MINUTES = 40;      // 1回の録音の上限（分）
+var GROUP_COUNT = 30;
+var MAX_MINUTES = 40;
 /* ================================================================ */
 
-var SEND_INTERVAL_MS = 30000;   // 文字起こしを送る間隔（30秒ごと）
-var CHUNK_CHARS = 800000;       // 音声を分けて送るときの1回分の大きさ
+var SEND_INTERVAL_MS = 30000;
+var CHUNK_CHARS = 800000;
 var MAX_MS = MAX_MINUTES * 60 * 1000;
+
+/* 「回」は先生が教員卓で切り替えます。生徒側は自動で追従します。
+   録音を始めた時点の回で固定されるので、途中で切り替わっても混ざりません。 */
+var CLASS_ID = '';        // 送信に使う回。録音開始時に確定します。
+var ROUND_LABEL = '';
 
 var recorder = null, stream = null, chunks = [], recBlob = null;
 var recognition = null, wantRecognize = false;
@@ -175,9 +143,6 @@ var isRecording = false, saved = false;
 
 var $ = function (id) { return document.getElementById(id); };
 
-/* ------------------------------------------------------------------
-   起動時：班のリストを作り、?g=12 があればその班を選ぶ
------------------------------------------------------------------- */
 (function init() {
   var sel = $('group');
   for (var i = 1; i <= GROUP_COUNT; i++) {
@@ -188,22 +153,33 @@ var $ = function (id) { return document.getElementById(id); };
   var g = parseInt(new URLSearchParams(location.search).get('g'), 10);
   if (g >= 1 && g <= GROUP_COUNT) sel.value = g + '班';
   $('maxLabel').textContent = MAX_MINUTES;
+
+  loadRound();
+  // 録音していないあいだは1分ごとに回を見に行き、先生の切り替えに追従します
+  setInterval(function () { if (!isRecording) loadRound(); }, 60000);
 })();
 
-/* ------------------------------------------------------------------
-   表示のヘルパー
------------------------------------------------------------------- */
+/* 今おこなっている回をサーバーから取得する */
+async function loadRound() {
+  try {
+    var r = await api('getRound');
+    CLASS_ID = r.classId;
+    ROUND_LABEL = r.label;
+    $('roundBox').textContent = '📌 いまの回：' + r.label;
+  } catch (e) {
+    $('roundBox').textContent = '⚠️ 回を確認できませんでした（' + e.message + '）';
+  }
+}
+
 function status(html, kind) {
   $('status').innerHTML = '<div class="msg ' + (kind || '') + '">' + html + '</div>';
 }
 function clearStatus() { $('status').innerHTML = ''; }
-function newSessionId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 8); }
+function newSessionId() { return Date.now() + '-' + Math.random().toString(36).slice(2, 6); }
 function theName() { return ($('name').value || '').trim() || '匿名'; }
 
-/* Apps Script への送信。
-   Content-Type を text/plain にすることで、CORSの事前確認を発生させずに送ります。 */
 async function api(action, data) {
-  var body = Object.assign({ action: action, token: TOKEN }, data || {});
+  var body = Object.assign({ action: action, token: TOKEN, classId: CLASS_ID }, data || {});
   var res = await fetch(GAS_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -214,28 +190,25 @@ async function api(action, data) {
   return out;
 }
 
-/* ------------------------------------------------------------------
-   ボタンは1つ。押すたびに 開始 ⇄ 停止 が切り替わる。
------------------------------------------------------------------- */
-$('btnMain').onclick = function () {
-  if (isRecording) { stopAll(); } else { startAll(); }
-};
+$('btnMain').onclick = function () { if (isRecording) stopAll(); else startAll(); };
 
 async function startAll() {
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    micError('このページではマイクを使えません。',
-      'https:// で始まるURLで開いているか確認してください。');
+  // 開始時に最新の回を取り直し、この録音のあいだは固定します
+  await loadRound();
+  if (!CLASS_ID) {
+    status('回を確認できませんでした。<span class="sub">通信を確認して、もう一度お試しください。</span>', 'err');
     return;
   }
 
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    micError('このページではマイクを使えません。', 'https:// で始まるURLで開いているか確認してください。');
+    return;
+  }
   try {
     stream = await navigator.mediaDevices.getUserMedia({
       audio: { echoCancellation: true, noiseSuppression: true }
     });
-  } catch (e) {
-    handleMicError(e);
-    return;
-  }
+  } catch (e) { handleMicError(e); return; }
 
   mimeType = pickMime();
   chunks = []; recBlob = null; saved = false;
@@ -274,11 +247,9 @@ function handleMicError(e) {
     micError('マイクの使用が許可されませんでした。',
       'アドレスバー左の鍵アイコン →「マイク」を「許可」にして、ページを再読み込みしてください。');
   } else if (name === 'NotFoundError' || name === 'OverconstrainedError') {
-    micError('マイクが見つかりませんでした。',
-      'イヤホンマイクを接続するか、別の端末でお試しください。');
+    micError('マイクが見つかりませんでした。', 'イヤホンマイクを接続するか、別の端末でお試しください。');
   } else if (name === 'NotReadableError') {
-    micError('マイクを他のアプリが使用中です。',
-      'Zoom や録音アプリなど、マイクを使っているアプリを閉じてからもう一度お試しください。');
+    micError('マイクを他のアプリが使用中です。', 'マイクを使っているアプリを閉じてからお試しください。');
   } else {
     micError('マイクを使えませんでした。', (e && e.message) ? e.message : '');
   }
@@ -298,14 +269,10 @@ function pickMime() {
 }
 
 function tick() {
-  var s = Math.floor((Date.now() - startedAt) / 1000);
-  var m = Math.floor(s / 60);
+  var s = Math.floor((Date.now() - startedAt) / 1000), m = Math.floor(s / 60);
   $('timer').textContent = ('0' + m).slice(-2) + ':' + ('0' + (s % 60)).slice(-2);
 }
 
-/* ------------------------------------------------------------------
-   リアルタイム文字起こし（Web Speech API）
------------------------------------------------------------------- */
 function startRecognition() {
   var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SR) {
@@ -326,10 +293,8 @@ function startRecognition() {
         buffer += t;
         $('liveText').textContent += t + '。';
         $('live').scrollTop = $('live').scrollHeight;
-        if (buffer.length > 600) flushBuffer();
-      } else {
-        interim += t;
-      }
+        if (buffer.length > 400) flushBuffer();   // 先生の画面に早く届くよう短めに
+      } else { interim += t; }
     }
     $('interimText').textContent = interim;
   };
@@ -341,7 +306,6 @@ function startRecognition() {
     }
   };
 
-  // Chrome は数十秒で勝手に止まるので、止まったら自動で掛け直す
   recognition.onend = function () {
     if (wantRecognize) { try { recognition.start(); } catch (e) {} }
   };
@@ -360,19 +324,13 @@ function flushBuffer() {
   if (!text) return Promise.resolve();
   buffer = '';
   return api('transcript', {
-    sessionId: sessionId,
-    group: $('group').value,
-    name: theName(),
-    text: text
+    sessionId: sessionId, group: $('group').value, name: theName(), text: text
   }).catch(function (e) {
-    buffer = text + buffer;   // 失敗したら次回にまとめて送る
+    buffer = text + buffer;
     console.log('送信リトライ待ち: ' + e.message);
   });
 }
 
-/* ------------------------------------------------------------------
-   停止 → そのまま自動で保存・要約
------------------------------------------------------------------- */
 function stopAll() {
   if (!recorder || recorder.state === 'inactive') return;
   durationSec = Math.floor((Date.now() - startedAt) / 1000);
@@ -398,7 +356,6 @@ function onRecorderStop() {
 
 async function saveAndSummarize(blob, mtype, seconds, withSummary) {
   $('btnMain').disabled = true;
-
   try {
     status('保存の準備をしています…', 'wait');
     var b64 = await blobToBase64(blob);
@@ -417,25 +374,22 @@ async function saveAndSummarize(blob, mtype, seconds, withSummary) {
     }
 
     status('ドライブに保存しています…', 'wait');
-    var r = await api('finalize', {
+    await api('finalize', {
       sessionId: sessionId, group: $('group').value, name: theName(),
       fileName: fileName, mimeType: mtype, total: total, seconds: seconds
     });
     saved = true;
 
     if (!withSummary) {
-      status('🎉 音声を保存しました。<br>お疲れさまでした！', '');
+      status('🎉 音声を保存しました。お疲れさまでした！', '');
       resetButton();
       return;
     }
 
-    status('保存しました。続けて、話し合いの要約を作成しています…', 'wait');
-
+    status('保存しました。班全体の話し合いを要約しています…', 'wait');
     try {
-      await api('summarize', {
-        sessionId: sessionId, group: $('group').value,
-        name: theName(), audioUrl: r.url
-      });
+      // ★班ごとに要約。同じ班の他の人の録音もまとめて1本になります。
+      await api('summarize', { group: $('group').value });
       status('🎉 保存と要約が完了しました。<br>お疲れさまでした！', '');
     } catch (e) {
       status('🎉 音声は保存できました。<span class="sub">' + e.message + '</span>', 'wait');
@@ -457,7 +411,6 @@ async function saveAndSummarize(blob, mtype, seconds, withSummary) {
 function resetHandler() {
   $('btnMain').onclick = function () { if (isRecording) stopAll(); else startAll(); };
 }
-
 function resetButton() {
   $('btnMain').disabled = false;
   $('btnMain').textContent = '🎤 もう一度録音する';
@@ -465,7 +418,6 @@ function resetButton() {
   resetHandler();
 }
 
-/* 代替手段：端末の録音アプリで録ったファイルを提出 */
 $('fileRec').addEventListener('change', function (ev) {
   var f = ev.target.files && ev.target.files[0];
   if (!f) return;
